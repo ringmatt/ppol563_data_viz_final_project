@@ -6,3 +6,5 @@
 # Text
 *.doc
 *.docx
+packrat/lib*/
+.Rproj.user
