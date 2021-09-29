@@ -1,0 +1,8 @@
+# Data
+*.csv
+*.xlsx
+*.xls
+
+# Text
+*.doc
+*.docx
