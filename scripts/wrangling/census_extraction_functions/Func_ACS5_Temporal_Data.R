@@ -1,4 +1,4 @@
-temporalData5YearACS <- function(group, geo = "county subdivision", years = c(2012), states = c(NULL), counties = 1, 
+temporalData5YearACS <- function(group, geo = "county subdivision", years = c(2012), states = c(NULL), counties = c(NULL), 
                                  geometry = FALSE, specificity = 1, cb = F){
   '
   This function pulls uses ACS 1-Year data to create a dataframe of different census variables by state and year

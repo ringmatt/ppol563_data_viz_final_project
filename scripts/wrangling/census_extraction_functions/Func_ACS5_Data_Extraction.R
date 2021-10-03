@@ -1,5 +1,5 @@
 extract5YearACSData <- function(group, geo = "county subdivision", year = 2012, states = c(NULL), 
-                                counties = 1, geometry = FALSE, specificity = 1, cb = F){
+                                counties = c(NULL), geometry = FALSE, specificity = 1, cb = F){
   '
     This function pulls ACS 1-Year data based on a particular group, year, and as many states as desired
     Packages Required - 
@@ -46,15 +46,16 @@ extract5YearACSData <- function(group, geo = "county subdivision", year = 2012, 
   acsData <- data.frame()
   
   for (i in 1:length(states)){
-    for (j in 1:length(counties)){
+    
+    # Only iterate over select counties if specified
+    if (length(counties) == 0){
       acsDataTemp <- get_acs(geography = geo, table = group, year = year,
-                        state = states[i], county = counties[j], 
-                        geometry = geometry, summary_var = paste0(group, "_001"), cb = cb)
+                             state = states[i], county = NULL, 
+                             geometry = geometry, summary_var = paste0(group, "_001"), cb = cb)
       
       # Adds identifying columns
       acsDataTemp$year <- year
       acsDataTemp$state <- states[i]
-      acsDataTemp$county <- counties[j]
       
       # Extracts the county name
       acsDataTemp$county_name <- str_match(acsDataTemp$NAME, ",\\s*(.*?)\\s*,")[,2]
@@ -68,7 +69,32 @@ extract5YearACSData <- function(group, geo = "county subdivision", year = 2012, 
       # Merges this new data with the current data frame
       # rbind.fill will fill any missing columns with NAs
       acsData <- rbind.fill(acsData, acsDataTemp)
+    }else{
+      for (j in 1:length(counties)){
+        acsDataTemp <- get_acs(geography = geo, table = group, year = year,
+                               state = states[i], county = counties[j], 
+                               geometry = geometry, summary_var = paste0(group, "_001"), cb = cb)
+        
+        # Adds identifying columns
+        acsDataTemp$year <- year
+        acsDataTemp$state <- states[i]
+        acsDataTemp$county <- counties[j]
+        
+        # Extracts the county name
+        acsDataTemp$county_name <- str_match(acsDataTemp$NAME, ",\\s*(.*?)\\s*,")[,2]
+        
+        # Extracts the state name
+        acsDataTemp$state_name <- trimws(gsub(".*,", "\\1", acsDataTemp$NAME))
+        
+        # Extracts the sub-county name
+        acsDataTemp$NAME <- gsub(",.*", "\\1", acsDataTemp$NAME)
+        
+        # Merges this new data with the current data frame
+        # rbind.fill will fill any missing columns with NAs
+        acsData <- rbind.fill(acsData, acsDataTemp)
+      }
     }
+    
   }
   
   # Removes state and other names from sub-county names

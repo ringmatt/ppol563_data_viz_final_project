@@ -1,7 +1,7 @@
 ## Loading API & Packages
 
 # Add Census key
-Sys.setenv(CENSUS_KEY="Your Key Here")
+Sys.setenv(CENSUS_KEY="2f018b883dd35f1fd0f30cdf8b1a8663cff19bdb")
 
 # packages
 library(censusapi)
@@ -12,7 +12,7 @@ require(stringi)
 
 # Imports the tidycensus package, which is a simpler way of working with census data
 library(tidycensus)
-census_api_key("Your Key Here")
+census_api_key(Sys.getenv("CENSUS_API_KEY"))
 
 library(sf)
 
@@ -104,7 +104,7 @@ rm(df_tract_iunemployed)
 df_tract_iemployed <- df_tract_icivlabor %>%
   as_tibble() %>%
     filter(variable == "Estimate_Total_In labor force_Civilian labor force_Employed") %>%
-    select(c(GEOID, year, civ_unemp = estimate))
+    select(c(GEOID, year, civ_emp = estimate))
 # Appends to main dataset and removes old object
 df <- df %>%
   left_join(df_tract_iemployed, by = c("GEOID", "year"))
@@ -143,7 +143,7 @@ rm(df_tract_ointernet)
 
 # Health Insurance Coverage
 df_tract_ohealthcov <- temporalData5YearACS("B27001", geo = "county", 
-                                           years = 2012:2019, 
+                                           years = 2012,
                                            states = st, geometry = F, 
                                            specificity = 4) %>%
   as_tibble() %>%
@@ -263,7 +263,7 @@ rm(df_tract_dnative)
 df_tract_dasian <- df_tract_drace %>%
   as_tibble() %>%
   filter(variable == "Estimate_Total_Asian alone") %>%
-  select(c(GEOID, year, asian_pop = estimate,))
+  select(c(GEOID, year, asian_pop = estimate))
 
 # Appends to main dataset and removes old object
 df <- df %>%
