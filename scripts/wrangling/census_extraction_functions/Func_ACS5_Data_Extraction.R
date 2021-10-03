@@ -1,5 +1,5 @@
 extract5YearACSData <- function(group, geo = "county subdivision", year = 2012, states = c(NULL), 
-                                counties = c(NULL), geometry = FALSE, specificity = 1, cb = F){
+                                counties = 1, geometry = FALSE, specificity = 1, cb = F){
   '
     This function pulls ACS 1-Year data based on a particular group, year, and as many states as desired
     Packages Required - 
@@ -45,8 +45,8 @@ extract5YearACSData <- function(group, geo = "county subdivision", year = 2012, 
   # Initializes the final dataset
   acsData <- data.frame()
   
-  for (i in length(states)){
-    for (j in length(counties)){
+  for (i in 1:length(states)){
+    for (j in 1:length(counties)){
       acsDataTemp <- get_acs(geography = geo, table = group, year = year,
                         state = states[i], county = counties[j], 
                         geometry = geometry, summary_var = paste0(group, "_001"), cb = cb)

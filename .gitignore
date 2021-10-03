@@ -3,6 +3,12 @@
 *.xlsx
 *.xls
 
+# ESRI Shapefiles
+*.shp
+*.dbf
+*.prj
+*.shx
+
 # Text
 *.doc
 *.docx
