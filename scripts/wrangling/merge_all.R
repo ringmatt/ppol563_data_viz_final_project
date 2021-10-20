@@ -7,6 +7,8 @@ library(sf)
 
 # data
 
+# Load the below if editting existing 
+
 df_census <-
   read.csv("data/processed/census.csv") %>%
   as_tibble() %>%
@@ -57,15 +59,26 @@ df_transit <-
             train_2021 = sum(train),
             air_2021 = sum(air))
 
-#df_schools <-
-#  read.csv("data/processed/schools.csv") %>%
-#  as_tibble() %>%
+# Only contains schools in the DMV area
+
+df_schools <-
+  read.csv("data/processed/schools.csv") %>%
+  as_tibble() %>%
   # Converts tract to county
-#  mutate(GEOID = as.integer(substr(GEOID, 1, nchar(GEOID)-6))) %>%
-#  group_by(GEOID, year) %>%
-#  summarize(public_schools = sum(public_schools),
-#            private_schools = sum(private_schools),
-#            postsecondary_schools = sum(postsecondary_schools))
+  mutate(GEOID = as.integer(substr(GEOID, 1, nchar(GEOID) - 6))) %>%
+  group_by(GEOID, year) %>%
+  summarize(
+    public_schools = sum(public, na.rm = T),
+    private_schools = sum(private, na.rm = T),
+    postsecondary_schools = sum(postsecondary, na.rm = T)) %>%
+  mutate(
+    public_schools = ifelse(public_schools == 0, NA, public_schools),
+    private_schools = ifelse(private_schools == 0, NA, private_schools),
+    postsecondary_schools = ifelse(postsecondary_schools == 0, NA, postsecondary_schools)
+  ) %>%
+  fill(private_schools,
+       public_schools,
+       postsecondary_schools)
 
 df_housing <-
   read.csv("data/processed/building_permits_1990_2019.csv") %>%
@@ -95,6 +108,7 @@ df <- df_housing %>%
   left_join(df_transit) %>%
   left_join(df_census) %>%
   left_join(df_hospital) %>%
+  left_join(df_schools) %>%
   #left_join(df_sf) %>%
   arrange(GEOID, year)
 

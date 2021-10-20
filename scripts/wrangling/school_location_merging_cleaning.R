@@ -62,6 +62,14 @@ latlong2fips <- function(latitude, longitude) {
   return(result$Block$FIPS)
 }
 
+# Trims latitudes and longitudes outside of a desired range
+# Current Bounds: Approximately the DC, Maryland, and Virginia
+df <- df %>%
+  filter(lat >= 35 &
+         lat <= 40 &
+         lon >= -87 &
+         lon <= -72)
+
 # Solution using Census API
 tract_fips <- vector(length = nrow(df))
 for (i in 1:nrow(df)){
@@ -83,12 +91,14 @@ df$GEOID <- tract_fips
 ## Grouping by Tract & year
 
 df_grouped <- df %>%
+  as_tibble() %>%
   mutate(value = 1) %>%
-  pivot_wider(id_cols = c(lat, lon, year), names_from = school_type, values_from = value) %>%
-  group_by(GEOID, year) %>%
-  summarize(public_schools = sum(public, na.rm = T),
-            private_schools = sum(private, na.rm = T),
-            postsecondary_schools = sum(postsecondary, na.rm = T))
+  group_by(GEOID, school_type, year) %>%
+  summarize(count = sum(value, na.rm = T)) %>%
+  #ungroup(year) %>%
+  #mutate(csum = cumsum(count)) %>%
+  select(c(GEOID, school_type, year, count)) %>%
+  pivot_wider(id_cols = c(GEOID, year), names_from = school_type, values_from = count)
 
 ## Save
 
